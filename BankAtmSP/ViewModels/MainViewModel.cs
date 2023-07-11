@@ -17,10 +17,18 @@ namespace BankAtmSP.ViewModels
         public RelayCommand EnterCardBtn { get; set; }
         public RelayCommand LoadCommand { get; set; }
         public RelayCommand TransferMoneyCommand { get; set; }
+        public RelayCommand CloseCommand { get; set; }
+
         public CardRepo cardRepo { get; set; }
         public List<Card> Cards { get; set; }
         public Card Card { get; set; }
         public MainWindow MainWindow { get; set; }
+        public Mutex Mutex { get; }
+        private static Mutex _mutex = null;
+        bool createdNew;
+
+
+
 
         public static object obj = new object();
 
@@ -30,13 +38,13 @@ namespace BankAtmSP.ViewModels
             Cards = new List<Card>();
             cardRepo = new CardRepo();
             Cards = cardRepo.GetAll();
-            EnterCardBtn = new RelayCommand((sender) =>
+            EnterCardBtn = new RelayCommand((objj) =>
             {
                 mainWindow.cardNumberTxt.Visibility = Visibility.Visible;
                 mainWindow.cardNumberLbl.Visibility = Visibility.Visible;
                 mainWindow.loadBtn.Visibility = Visibility.Visible;
             });
-            LoadCommand = new RelayCommand((obj) =>
+            LoadCommand = new RelayCommand((objj) =>
             {
                 foreach (var item in Cards)
                 {
@@ -56,7 +64,7 @@ namespace BankAtmSP.ViewModels
                 }
             });
 
-            TransferMoneyCommand = new RelayCommand((obj) =>
+            TransferMoneyCommand = new RelayCommand((objj) =>
             {      
                 lock (obj)
                 {
@@ -76,6 +84,23 @@ namespace BankAtmSP.ViewModels
                     }
                 }
             });
+
+            CloseCommand = new RelayCommand((obj) =>
+            {
+                const string appName = "MyAppName";
+
+                _mutex = new Mutex(true, appName, out createdNew);
+
+                if (!createdNew)
+                {
+                    //app is already running! Exiting the application  
+                    MessageBox.Show("App is already running");
+                    //Application.Current.Shutdown();
+                }
+            });
+
+
+
 
         }
 
